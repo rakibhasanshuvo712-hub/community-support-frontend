@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, CheckCircle2, PauseCircle, Trash2, Upload } from "lucide-react";
+import { Bell, CheckCircle2, Flag, PauseCircle, Trash2, Upload } from "lucide-react";
 import { apiFetch, ApiError } from "@/lib/api";
 import { useAuth, useLanguage } from "@/components/providers/AppProviders";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
 import type { Claim, Contribution, NotificationItem, Post } from "@/types";
 
-type Tab = "posts" | "claims" | "contributions" | "notifications" | "settings";
+type Tab = "posts" | "claims" | "contributions" | "disputes" | "notifications" | "settings";
+
+interface DisputeTarget {
+  targetUserId: string;
+  targetName: string;
+  postId: string;
+  claimId?: string;
+  contributionId?: string;
+}
+
+interface ReportItem {
+  id: string;
+  target_type: string;
+  target_user_name?: string | null;
+  target_post_title?: string | null;
+  reason: string;
+  details?: string | null;
+  status: string;
+  resolution_note?: string | null;
+  created_at: string;
+}
 
 export default function DashboardPage() {
   const queryClient = useQueryClient();
@@ -20,6 +40,11 @@ export default function DashboardPage() {
   const { t } = useLanguage();
   const [tab, setTab] = useState<Tab>("posts");
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  // Dispute modal/inline state
+  const [disputeTarget, setDisputeTarget] = useState<DisputeTarget | null>(null);
+  const [disputeReason, setDisputeReason] = useState("");
+  const [disputeDetails, setDisputeDetails] = useState("");
 
   // Settings form state
   const [fullName, setFullName] = useState("");
@@ -44,6 +69,12 @@ export default function DashboardPage() {
     queryKey: ["my-contributions"],
     enabled: Boolean(user),
     queryFn: () => apiFetch<{ outgoing: Contribution[]; incoming: Contribution[] }>("/contributions/mine"),
+  });
+
+  const { data: myReports } = useQuery({
+    queryKey: ["my-reports"],
+    enabled: Boolean(user),
+    queryFn: () => apiFetch<{ reports: ReportItem[] }>("/reports/mine"),
   });
 
   const { data: notifData } = useQuery({
@@ -111,6 +142,32 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSubmitDispute = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!disputeTarget) return;
+    try {
+      await apiFetch("/reports", {
+        method: "POST",
+        body: JSON.stringify({
+          target_type: "dispute",
+          target_user_id: disputeTarget.targetUserId,
+          target_post_id: disputeTarget.postId,
+          claim_id: disputeTarget.claimId ?? null,
+          contribution_id: disputeTarget.contributionId ?? null,
+          reason: disputeReason,
+          details: disputeDetails,
+        }),
+      });
+      setDisputeTarget(null);
+      setDisputeReason("");
+      setDisputeDetails("");
+      setFeedback("Complaint submitted. An administrator will review this dispute.");
+      void queryClient.invalidateQueries({ queryKey: ["my-reports"] });
+    } catch (err) {
+      setFeedback(err instanceof ApiError ? err.message : "Could not submit complaint");
+    }
+  };
+
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -163,6 +220,35 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {disputeTarget && (
+        <Card className="mb-6 border-rose-200 bg-rose-50/40 p-5">
+          <h2 className="text-base font-bold text-slate-900">
+            File a Complaint / Dispute against {disputeTarget.targetName}
+          </h2>
+          <form onSubmit={handleSubmitDispute} className="mt-3 space-y-3">
+            <Input
+              required
+              value={disputeReason}
+              onChange={(e) => setDisputeReason(e.target.value)}
+              placeholder="Reason (e.g., No-show at handover, unconfirmed transfer, misleading item)"
+            />
+            <Textarea
+              value={disputeDetails}
+              onChange={(e) => setDisputeDetails(e.target.value)}
+              placeholder="Describe what happened so an administrator can resolve this dispute..."
+            />
+            <div className="flex gap-2">
+              <Button type="submit" variant="destructive" size="sm">
+                Submit Complaint
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setDisputeTarget(null)}>
+                {t.common.cancel}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
+
       {/* Tabs */}
       <div className="mb-6 flex flex-wrap gap-2 border-b border-slate-200 pb-3">
         {(
@@ -170,6 +256,7 @@ export default function DashboardPage() {
             ["posts", t.dashboard.myPosts],
             ["claims", t.dashboard.myClaims],
             ["contributions", t.dashboard.myContributions],
+            ["disputes", `Complaints (${myReports?.reports.length ?? 0})`],
             ["notifications", `${t.dashboard.notifications} (${notifData?.unread_count ?? 0})`],
             ["settings", t.dashboard.settings],
           ] as Array<[Tab, string]>
@@ -185,7 +272,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Tab Content */}
       {tab === "posts" && (
         <div className="grid gap-4 md:grid-cols-2">
           {(myPosts?.posts ?? []).length === 0 ? (
@@ -267,6 +353,21 @@ export default function DashboardPage() {
                           {t.common.confirmHandover}
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          setDisputeTarget({
+                            targetUserId: c.claimant_id,
+                            targetName: c.claimant?.full_name || "Participant",
+                            postId: c.post_id,
+                            claimId: c.id,
+                          })
+                        }
+                      >
+                        <Flag className="h-3.5 w-3.5 text-rose-600" />
+                        Complain
+                      </Button>
                     </div>
                   </div>
                 ))
@@ -301,6 +402,23 @@ export default function DashboardPage() {
                           {t.common.confirmHandover}
                         </Button>
                       )}
+                      {c.post?.author_id && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            setDisputeTarget({
+                              targetUserId: c.post!.author_id,
+                              targetName: c.post?.author?.full_name || "Post Owner",
+                              postId: c.post_id,
+                              claimId: c.id,
+                            })
+                          }
+                        >
+                          <Flag className="h-3.5 w-3.5 text-rose-600" />
+                          Complain
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))
@@ -327,11 +445,28 @@ export default function DashboardPage() {
                       {t.status[c.status]}
                     </Badge>
                   </div>
-                  {c.status === "pledged" && (
-                    <Button size="sm" onClick={() => void handleContributionAction(c.id, "confirm")}>
-                      {t.common.confirmTransfer}
+                  <div className="flex flex-wrap gap-2">
+                    {c.status === "pledged" && (
+                      <Button size="sm" onClick={() => void handleContributionAction(c.id, "confirm")}>
+                        {t.common.confirmTransfer}
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        setDisputeTarget({
+                          targetUserId: c.contributor_id,
+                          targetName: c.contributor?.full_name || "Donor",
+                          postId: c.post_id,
+                          contributionId: c.id,
+                        })
+                      }
+                    >
+                      <Flag className="h-3.5 w-3.5 text-rose-600" />
+                      Complain
                     </Button>
-                  )}
+                  </div>
                 </div>
               ))}
               {(myContributions?.incoming ?? []).length === 0 && (
@@ -356,16 +491,35 @@ export default function DashboardPage() {
                     </Badge>
                   </div>
                   <p className="text-xs text-slate-600">{c.post?.title}</p>
-                  {c.status === "pledged" && (
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => void handleContributionAction(c.id, "confirm")}>
-                        {t.common.confirmTransfer}
+                  <div className="flex flex-wrap gap-2">
+                    {c.status === "pledged" && (
+                      <>
+                        <Button size="sm" onClick={() => void handleContributionAction(c.id, "confirm")}>
+                          {t.common.confirmTransfer}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => void handleContributionAction(c.id, "cancel")}>
+                          {t.common.cancel}
+                        </Button>
+                      </>
+                    )}
+                    {c.post?.author_id && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() =>
+                          setDisputeTarget({
+                            targetUserId: c.post!.author_id,
+                            targetName: c.post?.author?.full_name || "Recipient",
+                            postId: c.post_id,
+                            contributionId: c.id,
+                          })
+                        }
+                      >
+                        <Flag className="h-3.5 w-3.5 text-rose-600" />
+                        Complain
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => void handleContributionAction(c.id, "cancel")}>
-                        {t.common.cancel}
-                      </Button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               ))}
               {(myContributions?.outgoing ?? []).length === 0 && (
@@ -374,6 +528,40 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {tab === "disputes" && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">My Complaints & Disputes</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {(myReports?.reports ?? []).length === 0 ? (
+              <p className="text-sm text-slate-500">You have not filed any complaints or disputes.</p>
+            ) : (
+              (myReports?.reports ?? []).map((r) => (
+                <div key={r.id} className="rounded-xl border border-slate-200 p-3 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold">{r.reason}</span>
+                    <Badge variant={r.status === "resolved" ? "default" : "warning"}>{r.status}</Badge>
+                  </div>
+                  {r.target_user_name && (
+                    <p className="text-xs text-slate-600">Against: {r.target_user_name}</p>
+                  )}
+                  {r.target_post_title && (
+                    <p className="text-xs text-slate-600">Post: {r.target_post_title}</p>
+                  )}
+                  {r.details && <p className="text-xs text-slate-700">{r.details}</p>}
+                  {r.resolution_note && (
+                    <p className="mt-1 rounded bg-slate-50 p-2 text-xs text-emerald-800">
+                      Admin resolution: {r.resolution_note}
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {tab === "notifications" && (
