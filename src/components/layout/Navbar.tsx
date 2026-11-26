@@ -37,6 +37,7 @@ export function Navbar() {
   const navLinks = [
     { href: "/donations", label: t.nav.donations },
     { href: "/requests", label: t.nav.requests },
+    { href: "/complain", label: t.nav.complain },
     { href: "/about", label: t.nav.about },
   ];
 
