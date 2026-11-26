@@ -37,6 +37,10 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
   const [showReport, setShowReport] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportDetails, setReportDetails] = useState("");
+  const [submittingClaim, setSubmittingClaim] = useState(false);
+  const [submittingPledge, setSubmittingPledge] = useState(false);
+  const [submittingReport, setSubmittingReport] = useState(false);
+  const [startingChat, setStartingChat] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["post", id],
@@ -47,6 +51,8 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
 
   const handleClaim = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingClaim) return;
+    setSubmittingClaim(true);
     setActionErr(null);
     setActionMsg(null);
     try {
@@ -59,11 +65,15 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
       void queryClient.invalidateQueries({ queryKey: ["post", id] });
     } catch (err) {
       setActionErr(err instanceof ApiError ? err.message : "Could not submit request");
+    } finally {
+      setSubmittingClaim(false);
     }
   };
 
   const handlePledge = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingPledge) return;
+    setSubmittingPledge(true);
     setActionErr(null);
     setActionMsg(null);
     try {
@@ -83,11 +93,14 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
       void queryClient.invalidateQueries({ queryKey: ["post", id] });
     } catch (err) {
       setActionErr(err instanceof ApiError ? err.message : "Could not record pledge");
+    } finally {
+      setSubmittingPledge(false);
     }
   };
 
   const handleMessageAuthor = async () => {
-    if (!post) return;
+    if (!post || startingChat) return;
+    setStartingChat(true);
     try {
       const res = await apiFetch<{ conversation_id: string }>("/conversations", {
         method: "POST",
@@ -96,11 +109,15 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
       router.push(`/messages?conversation=${res.conversation_id}`);
     } catch (err) {
       setActionErr(err instanceof ApiError ? err.message : "Could not start conversation");
+    } finally {
+      setStartingChat(false);
     }
   };
 
   const handleReport = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingReport) return;
+    setSubmittingReport(true);
     try {
       await apiFetch("/reports", {
         method: "POST",
@@ -117,6 +134,8 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
       setActionMsg("Report submitted to moderators.");
     } catch (err) {
       setActionErr(err instanceof ApiError ? err.message : "Failed to submit report");
+    } finally {
+      setSubmittingReport(false);
     }
   };
 
@@ -292,9 +311,9 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
               )}
 
               {user && !isOwner && (
-                <Button variant="outline" className="w-full" onClick={handleMessageAuthor}>
+                <Button variant="outline" className="w-full" disabled={startingChat} onClick={handleMessageAuthor}>
                   <MessageSquare className="h-4 w-4" />
-                  <span>{t.common.messageAuthor}</span>
+                  <span>{startingChat ? "Opening..." : t.common.messageAuthor}</span>
                 </Button>
               )}
             </CardContent>
@@ -343,9 +362,9 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                       onChange={(e) => setPledgeNote(e.target.value)}
                       placeholder="Optional note on how you will transfer directly..."
                     />
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="w-full" disabled={submittingPledge}>
                       <HandCoins className="h-4 w-4" />
-                      <span>Record Pledge</span>
+                      <span>{submittingPledge ? "Recording..." : "Record Pledge"}</span>
                     </Button>
                   </form>
                 ) : (
@@ -355,10 +374,14 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                       onChange={(e) => setClaimMessage(e.target.value)}
                       placeholder="Write a brief message about handover timing or details..."
                     />
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="w-full" disabled={submittingClaim}>
                       <PackageCheck className="h-4 w-4" />
                       <span>
-                        {post.post_type === "help_request" ? "Offer to Donate" : "Request Item"}
+                        {submittingClaim
+                          ? "Submitting..."
+                          : post.post_type === "help_request"
+                            ? "Offer to Donate"
+                            : "Request Item"}
                       </span>
                     </Button>
                   </form>
@@ -387,8 +410,8 @@ export default function PostDetailsPage({ params }: { params: Promise<{ id: stri
                       onChange={(e) => setReportDetails(e.target.value)}
                       placeholder="Additional details..."
                     />
-                    <Button type="submit" variant="destructive" size="sm" className="w-full">
-                      Submit Report
+                    <Button type="submit" variant="destructive" size="sm" className="w-full" disabled={submittingReport}>
+                      {submittingReport ? "Submitting..." : "Submit Report"}
                     </Button>
                   </form>
                 </Card>

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import {
   HeartHandshake,
   Menu,
@@ -14,6 +15,7 @@ import {
   Globe,
   LogOut,
 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 import { useAuth, useLanguage } from "@/components/providers/AppProviders";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -23,6 +25,14 @@ export function Navbar() {
   const { lang, setLang, t } = useLanguage();
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const { data: notifData } = useQuery({
+    queryKey: ["notifications"],
+    enabled: Boolean(user),
+    refetchInterval: 30_000,
+    queryFn: () => apiFetch<{ unread_count: number }>("/notifications"),
+  });
+  const unreadCount = notifData?.unread_count ?? 0;
 
   const navLinks = [
     { href: "/donations", label: t.nav.donations },
@@ -89,6 +99,11 @@ export function Navbar() {
                 <Button variant="outline" size="sm">
                   <LayoutDashboard className="h-4 w-4" />
                   <span>{t.nav.dashboard}</span>
+                  {unreadCount > 0 && (
+                    <span className="ml-0.5 rounded-full bg-emerald-700 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+                      {unreadCount}
+                    </span>
+                  )}
                 </Button>
               </Link>
               {user.role === "admin" && (
