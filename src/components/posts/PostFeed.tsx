@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { apiFetch } from "@/lib/api";
@@ -17,10 +18,12 @@ interface PostFeedProps {
 }
 
 export function PostFeed({ defaultPostType, title, subtitle }: PostFeedProps) {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category") ?? "";
   const { lang, t } = useLanguage();
   const [q, setQ] = useState("");
   const [city, setCity] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [categoryId, setCategoryId] = useState(initialCategory);
   const [donationType, setDonationType] = useState("");
   const [urgency, setUrgency] = useState("");
   const [sort, setSort] = useState<"latest" | "urgent" | "relevant">("latest");
