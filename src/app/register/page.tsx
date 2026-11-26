@@ -12,9 +12,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
+const bdPhoneRegex = /^(?:\+?880|0)?1[3-9]\d{8}$/;
+
 const registerSchema = z.object({
-  full_name: z.string().trim().min(2).max(120),
-  email: z.string().email(),
+  full_name: z.string().trim().min(2, "Full name must be at least 2 characters").max(120),
+  phone: z
+    .string()
+    .trim()
+    .transform((v) => v.replace(/[\s\-()]/g, ""))
+    .refine((v) => bdPhoneRegex.test(v), {
+      message: "Enter a valid Bangladesh mobile number (e.g. 01712345678 or +8801712345678)",
+    }),
+  email: z
+    .string()
+    .trim()
+    .optional()
+    .refine((v) => !v || z.string().email().safeParse(v).success, {
+      message: "Enter a valid email address",
+    }),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
@@ -43,7 +58,13 @@ export default function RegisterPage() {
         requires_email_verification: boolean;
       }>("/auth/register", {
         method: "POST",
-        body: JSON.stringify({ ...values, preferred_language: lang }),
+        body: JSON.stringify({
+          full_name: values.full_name,
+          phone: values.phone,
+          email: values.email || undefined,
+          password: values.password,
+          preferred_language: lang,
+        }),
       });
 
       if (data.session?.access_token) {
@@ -62,7 +83,11 @@ export default function RegisterPage() {
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl">{t.auth.registerTitle}</CardTitle>
-          <p className="text-sm text-slate-600">{t.auth.registerSubtitle}</p>
+          <p className="text-sm text-slate-600">
+            {lang === "bn"
+              ? "আপনার বাংলাদেশি মোবাইল নম্বর দিয়ে সহায়তা একাউন্ট খুলুন"
+              : "Create your Sahayata account with your Bangladesh mobile number"}
+          </p>
         </CardHeader>
         <CardContent>
           {serverError && (
@@ -73,7 +98,7 @@ export default function RegisterPage() {
 
           {verifyNotice ? (
             <div className="space-y-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-              <p>Account created! Please check your email inbox to verify your email address before signing in.</p>
+              <p>Account created! You can now sign in with your phone number.</p>
               <Link href="/login">
                 <Button className="w-full">{t.nav.login}</Button>
               </Link>
@@ -87,7 +112,18 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">{t.auth.email}</label>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  {lang === "bn" ? "বাংলাদেশ মোবাইল নম্বর" : "Bangladesh Phone Number"}
+                </label>
+                <Input type="tel" {...register("phone")} placeholder="01712345678" />
+                <p className="mt-1 text-xs text-slate-500">Format: 01XXXXXXXXX or +8801XXXXXXXXX</p>
+                {errors.phone && <p className="mt-1 text-xs text-rose-600">{errors.phone.message}</p>}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  {lang === "bn" ? "ইমেইল (ঐচ্ছিক)" : "Email (Optional)"}
+                </label>
                 <Input type="email" {...register("email")} placeholder="you@example.com" />
                 {errors.email && <p className="mt-1 text-xs text-rose-600">{errors.email.message}</p>}
               </div>
