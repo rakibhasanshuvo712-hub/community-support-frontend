@@ -17,7 +17,7 @@ import type { Category, Post } from "@/types";
 const createPostSchema = z.object({
   post_type: z.enum(["donation_offer", "help_request"]),
   donation_type: z.enum(["item", "money", "service"]),
-  category_id: z.string().uuid("Please select a category"),
+  category_id: z.string().trim().min(1, "Please select a category"),
   title: z.string().trim().min(5).max(180),
   description: z.string().trim().min(10).max(5000),
   quantity: z.string().optional(),
