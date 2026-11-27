@@ -21,7 +21,7 @@ export function PostCard({ post }: { post: Post }) {
 
   return (
     <Link href={`/posts/${post.id}`} className="group block h-full">
-      <Card className="flex h-full flex-col overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-md">
+      <Card className="flex h-full flex-col overflow-hidden rounded-2xl border-slate-200/90 bg-white transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-950/5">
         {coverUrl ? (
           <div className="relative h-44 w-full overflow-hidden bg-slate-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -31,9 +31,18 @@ export function PostCard({ post }: { post: Post }) {
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
             />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/35 via-transparent to-transparent" />
+            <div className="absolute left-3 top-3 flex flex-wrap items-center gap-1.5">
+              <Badge variant={post.post_type === "donation_offer" ? "default" : "info"} className="shadow-sm">
+                {t.postTypes[post.post_type]}
+              </Badge>
+              <Badge variant={urgencyVariant[post.urgency]} className="shadow-sm">
+                {t.urgency[post.urgency]}
+              </Badge>
+            </div>
           </div>
         ) : (
-          <div className="flex h-28 items-center justify-center bg-gradient-to-br from-emerald-50 to-slate-100 text-emerald-700">
+          <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-50/60 to-slate-100 text-emerald-700">
             {post.donation_type === "money" ? (
               <Coins className="h-9 w-9 opacity-80" />
             ) : post.donation_type === "service" ? (
@@ -41,18 +50,22 @@ export function PostCard({ post }: { post: Post }) {
             ) : (
               <Package className="h-9 w-9 opacity-80" />
             )}
+            <div className="absolute left-3 top-3 flex flex-wrap items-center gap-1.5">
+              <Badge variant={post.post_type === "donation_offer" ? "default" : "info"}>
+                {t.postTypes[post.post_type]}
+              </Badge>
+              <Badge variant={urgencyVariant[post.urgency]}>{t.urgency[post.urgency]}</Badge>
+            </div>
           </div>
         )}
 
         <CardHeader className="pb-2">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Badge variant={post.post_type === "donation_offer" ? "default" : "info"}>
-              {t.postTypes[post.post_type]}
-            </Badge>
-            <Badge variant={urgencyVariant[post.urgency]}>{t.urgency[post.urgency]}</Badge>
-            {post.status === "fulfilled" && <Badge variant="secondary">{t.status.fulfilled}</Badge>}
-          </div>
-          <h3 className="mt-2 line-clamp-2 text-base font-semibold text-slate-900 group-hover:text-emerald-800">
+          {post.status === "fulfilled" && (
+            <div className="mb-1">
+              <Badge variant="secondary">{t.status.fulfilled}</Badge>
+            </div>
+          )}
+          <h3 className="line-clamp-2 text-base font-semibold leading-snug text-slate-900 group-hover:text-emerald-800">
             {post.title}
           </h3>
         </CardHeader>

@@ -8,15 +8,17 @@ export function Footer() {
   const { t } = useLanguage();
 
   return (
-    <footer className="border-t border-slate-200 bg-slate-50">
+    <footer className="border-t border-slate-200/80 bg-gradient-to-b from-slate-50 to-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-3">
           <div>
-            <div className="flex items-center gap-2">
-              <HeartHandshake className="h-5 w-5 text-emerald-700" />
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-white">
+                <HeartHandshake className="h-4 w-4" />
+              </div>
               <span className="text-base font-bold text-slate-900">{t.brand}</span>
             </div>
-            <p className="mt-2 text-sm text-slate-600">{t.trust.directMoneyDesc}</p>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600">{t.trust.directMoneyDesc}</p>
           </div>
 
           <div className="flex flex-col gap-2 text-sm text-slate-600">
@@ -24,6 +26,7 @@ export function Footer() {
             <Link href="/donations" className="hover:text-emerald-700">{t.nav.donations}</Link>
             <Link href="/requests" className="hover:text-emerald-700">{t.nav.requests}</Link>
             <Link href="/create" className="hover:text-emerald-700">{t.nav.create}</Link>
+            <Link href="/complain" className="hover:text-emerald-700">{t.nav.complain}</Link>
           </div>
 
           <div className="flex flex-col gap-2 text-sm text-slate-600">

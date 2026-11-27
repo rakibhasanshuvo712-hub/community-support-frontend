@@ -61,36 +61,69 @@ export default function HomePage() {
   return (
     <div className="bg-slate-50/50">
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-slate-200/80 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-100/70 via-white to-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <section className="relative overflow-hidden border-b border-emerald-100/80 bg-gradient-to-b from-emerald-50/90 via-white to-slate-50/40">
+        {/* Decorative ambient glow */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-32 left-1/2 h-96 w-[48rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-200/40 via-teal-100/40 to-amber-100/40 blur-3xl"
+        />
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1 text-xs font-semibold text-emerald-800 shadow-xs">
-              <ShieldCheck className="h-3.5 w-3.5" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-white/90 px-4 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm backdrop-blur-xs">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
               {t.hero.badge}
             </span>
-            <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+            <h1 className="mt-6 bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
               {t.hero.title}
             </h1>
-            <p className="mt-5 text-lg leading-relaxed text-slate-600">{t.hero.subtitle}</p>
+            <p className="mt-5 text-lg leading-relaxed text-slate-600 sm:text-xl">{t.hero.subtitle}</p>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-3.5">
               <Link href="/donations">
-                <Button size="lg" className="shadow-md shadow-emerald-700/15">
+                <Button size="lg" className="rounded-xl px-6 shadow-lg shadow-emerald-700/20 transition-transform hover:-translate-y-0.5">
                   {t.hero.ctaDonate}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/requests">
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" className="rounded-xl bg-white/80 px-6 backdrop-blur-xs transition-transform hover:-translate-y-0.5">
                   {t.hero.ctaRequest}
                 </Button>
               </Link>
               <Link href="/create">
-                <Button size="lg" variant="secondary">
+                <Button size="lg" variant="secondary" className="rounded-xl px-6 transition-transform hover:-translate-y-0.5">
                   <Sparkles className="h-4 w-4 text-emerald-700" />
                   {t.hero.ctaCreate}
                 </Button>
               </Link>
+            </div>
+
+            {/* Trust Highlights Strip */}
+            <div className="mt-10 grid grid-cols-2 gap-3 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:grid-cols-4">
+              <div className="text-center">
+                <p className="text-base font-bold text-emerald-800">100%</p>
+                <p className="text-[11px] font-medium text-slate-500">
+                  {lang === "bn" ? "সরাসরি সহায়তা" : "Direct Peer-to-Peer"}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-base font-bold text-emerald-800">0%</p>
+                <p className="text-[11px] font-medium text-slate-500">
+                  {lang === "bn" ? "প্ল্যাটফর্ম ফি" : "Platform Commission"}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-base font-bold text-emerald-800">2-Party</p>
+                <p className="text-[11px] font-medium text-slate-500">
+                  {lang === "bn" ? "দ্বিপাক্ষিক নিশ্চিতকরণ" : "Verified Handover"}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-base font-bold text-emerald-800">Private</p>
+                <p className="text-[11px] font-medium text-slate-500">
+                  {lang === "bn" ? "গোপন ঠিকানা সুরক্ষিত" : "Contacts Protected"}
+                </p>
+              </div>
             </div>
           </div>
 
