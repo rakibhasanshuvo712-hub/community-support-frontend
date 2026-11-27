@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { apiFetch, getStoredToken, setStoredToken } from "@/lib/api";
+import { apiFetch, ApiError, getStoredToken, setStoredToken } from "@/lib/api";
 import { translations, type Language } from "@/lib/i18n";
 import type { UserProfile } from "@/types";
 
@@ -17,7 +17,7 @@ const LanguageContext = createContext<LanguageContextValue | null>(null);
 interface AuthContextValue {
   user: UserProfile | null;
   isLoading: boolean;
-  setTokenAndRefresh: (token: string | null) => Promise<void>;
+  setTokenAndRefresh: (token: string | null, initialUser?: UserProfile | null) => Promise<void>;
   refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -65,9 +65,23 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     try {
       const data = await apiFetch<{ user: UserProfile }>("/auth/me", { token });
       setUser(data.user);
-    } catch {
-      setStoredToken(null);
-      setUser(null);
+    } catch (err) {
+      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+        setStoredToken(null);
+        setUser(null);
+      } else {
+        // Retry once for transient network or cold-start errors without wiping session
+        try {
+          await new Promise((r) => setTimeout(r, 500));
+          const retry = await apiFetch<{ user: UserProfile }>("/auth/me", { token });
+          setUser(retry.user);
+        } catch (retryErr) {
+          if (retryErr instanceof ApiError && (retryErr.status === 401 || retryErr.status === 403)) {
+            setStoredToken(null);
+            setUser(null);
+          }
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -80,9 +94,14 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   }, [refreshUser]);
 
   const setTokenAndRefresh = useCallback(
-    async (token: string | null) => {
+    async (token: string | null, initialUser?: UserProfile | null) => {
       setStoredToken(token);
-      setIsLoading(true);
+      if (initialUser) {
+        setUser(initialUser);
+        setIsLoading(false);
+      } else {
+        setIsLoading(true);
+      }
       await refreshUser();
     },
     [refreshUser]

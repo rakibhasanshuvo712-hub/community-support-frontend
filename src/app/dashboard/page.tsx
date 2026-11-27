@@ -137,14 +137,27 @@ export default function DashboardPage() {
     queryFn: () => apiFetch<ApplinkStatus>("/applink/status"),
   });
 
-  if (!authLoading && !user) {
+  if (authLoading) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-12 text-sm text-slate-500">
+        Loading your dashboard...
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <Card className="p-8">
           <p className="text-slate-600">Please sign in to access your dashboard.</p>
-          <Link href="/login">
-            <Button className="mt-4">{t.nav.login}</Button>
-          </Link>
+          <div className="mt-4 flex justify-center gap-3">
+            <Button variant="outline" onClick={() => void refreshUser()}>
+              Retry Session
+            </Button>
+            <Link href="/login">
+              <Button>{t.nav.login}</Button>
+            </Link>
+          </div>
         </Card>
       </div>
     );
