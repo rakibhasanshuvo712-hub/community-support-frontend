@@ -42,10 +42,11 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-emerald-100/80 bg-white/95 backdrop-blur-md">
+      <div className="h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-500 via-sky-500 to-amber-500" />
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-700 text-white shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 via-teal-600 to-sky-600 text-white shadow-md shadow-emerald-600/20">
             <HeartHandshake className="h-5 w-5" />
           </div>
           <div className="flex flex-col">

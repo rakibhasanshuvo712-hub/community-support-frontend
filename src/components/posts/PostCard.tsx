@@ -22,6 +22,13 @@ export function PostCard({ post }: { post: Post }) {
   return (
     <Link href={`/posts/${post.id}`} className="group block h-full">
       <Card className="flex h-full flex-col overflow-hidden rounded-2xl border-slate-200/90 bg-white transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-950/5">
+        <div
+          className={
+            post.post_type === "donation_offer"
+              ? "h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-500"
+              : "h-1 w-full bg-gradient-to-r from-sky-500 via-indigo-500 to-violet-500"
+          }
+        />
         {coverUrl ? (
           <div className="relative h-44 w-full overflow-hidden bg-slate-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}

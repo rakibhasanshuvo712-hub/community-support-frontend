@@ -45,6 +45,15 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
   package: Package,
 };
 
+const categoryColorThemes = [
+  "border-emerald-200/80 bg-gradient-to-br from-emerald-50/80 to-white hover:border-emerald-400 [&_.cat-icon]:bg-emerald-100 [&_.cat-icon]:text-emerald-700 group-hover:[&_.cat-icon]:bg-emerald-600",
+  "border-sky-200/80 bg-gradient-to-br from-sky-50/80 to-white hover:border-sky-400 [&_.cat-icon]:bg-sky-100 [&_.cat-icon]:text-sky-700 group-hover:[&_.cat-icon]:bg-sky-600",
+  "border-amber-200/80 bg-gradient-to-br from-amber-50/80 to-white hover:border-amber-400 [&_.cat-icon]:bg-amber-100 [&_.cat-icon]:text-amber-700 group-hover:[&_.cat-icon]:bg-amber-500",
+  "border-violet-200/80 bg-gradient-to-br from-violet-50/80 to-white hover:border-violet-400 [&_.cat-icon]:bg-violet-100 [&_.cat-icon]:text-violet-700 group-hover:[&_.cat-icon]:bg-violet-600",
+  "border-rose-200/80 bg-gradient-to-br from-rose-50/80 to-white hover:border-rose-400 [&_.cat-icon]:bg-rose-100 [&_.cat-icon]:text-rose-700 group-hover:[&_.cat-icon]:bg-rose-600",
+  "border-teal-200/80 bg-gradient-to-br from-teal-50/80 to-white hover:border-teal-400 [&_.cat-icon]:bg-teal-100 [&_.cat-icon]:text-teal-700 group-hover:[&_.cat-icon]:bg-teal-600",
+];
+
 export default function HomePage() {
   const { lang, t } = useLanguage();
 
@@ -61,66 +70,74 @@ export default function HomePage() {
   return (
     <div className="bg-slate-50/50">
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-emerald-100/80 bg-gradient-to-b from-emerald-50/90 via-white to-slate-50/40">
-        {/* Decorative ambient glow */}
+      <section className="relative overflow-hidden border-b border-emerald-100/80 bg-gradient-to-br from-emerald-100/70 via-sky-50/50 to-amber-50/60">
+        {/* Decorative ambient glows */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-32 left-1/2 h-96 w-[48rem] -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-200/40 via-teal-100/40 to-amber-100/40 blur-3xl"
+          className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-emerald-300/30 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 top-12 h-80 w-80 rounded-full bg-amber-300/30 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-0 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-sky-200/30 blur-3xl"
         />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-white/90 px-4 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm backdrop-blur-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/80 bg-white/90 px-4 py-1.5 text-xs font-semibold text-emerald-800 shadow-sm backdrop-blur-xs">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
               {t.hero.badge}
             </span>
-            <h1 className="mt-6 bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
+            <h1 className="mt-6 bg-gradient-to-r from-emerald-800 via-teal-700 to-sky-800 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl lg:text-6xl">
               {t.hero.title}
             </h1>
-            <p className="mt-5 text-lg leading-relaxed text-slate-600 sm:text-xl">{t.hero.subtitle}</p>
+            <p className="mt-5 text-lg leading-relaxed text-slate-700 sm:text-xl">{t.hero.subtitle}</p>
 
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3.5">
               <Link href="/donations">
-                <Button size="lg" className="rounded-xl px-6 shadow-lg shadow-emerald-700/20 transition-transform hover:-translate-y-0.5">
+                <Button size="lg" className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 text-white shadow-lg shadow-emerald-700/25 transition-transform hover:-translate-y-0.5 hover:from-emerald-700 hover:to-teal-700">
                   {t.hero.ctaDonate}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/requests">
-                <Button size="lg" variant="outline" className="rounded-xl bg-white/80 px-6 backdrop-blur-xs transition-transform hover:-translate-y-0.5">
+                <Button size="lg" variant="outline" className="rounded-xl border-sky-300 bg-white/90 px-6 text-sky-900 backdrop-blur-xs transition-transform hover:-translate-y-0.5 hover:bg-sky-50">
                   {t.hero.ctaRequest}
                 </Button>
               </Link>
               <Link href="/create">
-                <Button size="lg" variant="secondary" className="rounded-xl px-6 transition-transform hover:-translate-y-0.5">
-                  <Sparkles className="h-4 w-4 text-emerald-700" />
+                <Button size="lg" variant="secondary" className="rounded-xl bg-amber-100/90 px-6 text-amber-900 transition-transform hover:-translate-y-0.5 hover:bg-amber-200">
+                  <Sparkles className="h-4 w-4 text-amber-700" />
                   {t.hero.ctaCreate}
                 </Button>
               </Link>
             </div>
 
             {/* Trust Highlights Strip */}
-            <div className="mt-10 grid grid-cols-2 gap-3 rounded-2xl border border-slate-200/80 bg-white/80 p-4 shadow-sm backdrop-blur-sm sm:grid-cols-4">
-              <div className="text-center">
-                <p className="text-base font-bold text-emerald-800">100%</p>
-                <p className="text-[11px] font-medium text-slate-500">
+            <div className="mt-10 grid grid-cols-2 gap-3 rounded-2xl border border-white/80 bg-white/85 p-4 shadow-md shadow-emerald-950/5 backdrop-blur-sm sm:grid-cols-4">
+              <div className="rounded-xl bg-emerald-50/80 p-2 text-center">
+                <p className="text-base font-bold text-emerald-700">100%</p>
+                <p className="text-[11px] font-medium text-emerald-900/70">
                   {lang === "bn" ? "সরাসরি সহায়তা" : "Direct Peer-to-Peer"}
                 </p>
               </div>
-              <div className="text-center">
-                <p className="text-base font-bold text-emerald-800">0%</p>
-                <p className="text-[11px] font-medium text-slate-500">
+              <div className="rounded-xl bg-sky-50/80 p-2 text-center">
+                <p className="text-base font-bold text-sky-700">0%</p>
+                <p className="text-[11px] font-medium text-sky-900/70">
                   {lang === "bn" ? "প্ল্যাটফর্ম ফি" : "Platform Commission"}
                 </p>
               </div>
-              <div className="text-center">
-                <p className="text-base font-bold text-emerald-800">2-Party</p>
-                <p className="text-[11px] font-medium text-slate-500">
+              <div className="rounded-xl bg-amber-50/80 p-2 text-center">
+                <p className="text-base font-bold text-amber-700">2-Party</p>
+                <p className="text-[11px] font-medium text-amber-900/70">
                   {lang === "bn" ? "দ্বিপাক্ষিক নিশ্চিতকরণ" : "Verified Handover"}
                 </p>
               </div>
-              <div className="text-center">
-                <p className="text-base font-bold text-emerald-800">Private</p>
-                <p className="text-[11px] font-medium text-slate-500">
+              <div className="rounded-xl bg-violet-50/80 p-2 text-center">
+                <p className="text-base font-bold text-violet-700">Private</p>
+                <p className="text-[11px] font-medium text-violet-900/70">
                   {lang === "bn" ? "গোপন ঠিকানা সুরক্ষিত" : "Contacts Protected"}
                 </p>
               </div>
@@ -285,12 +302,13 @@ export default function HomePage() {
             </div>
 
             <div className="grid gap-3.5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {catData.categories.map((cat) => {
+              {catData.categories.map((cat, idx) => {
                 const Icon = categoryIcons[cat.icon] ?? Package;
+                const theme = categoryColorThemes[idx % categoryColorThemes.length];
                 return (
                   <Link key={cat.id} href={`/donations?category=${cat.id}`} className="group">
-                    <Card className="flex h-full items-center gap-3.5 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50/40 hover:shadow-sm">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 transition-colors group-hover:bg-emerald-700 group-hover:text-white">
+                    <Card className={`flex h-full items-center gap-3.5 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${theme}`}>
+                      <div className="cat-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors group-hover:text-white">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
