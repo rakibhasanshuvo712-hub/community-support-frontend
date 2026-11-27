@@ -69,17 +69,33 @@ export function PostCard({ post }: { post: Post }) {
           </div>
 
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span>
-              {post.donation_type === "money" && post.amount
-                ? `${post.amount.toLocaleString()} ${post.currency}`
-                : post.quantity
-                  ? `${post.quantity} ${post.unit || ""}`
-                  : t.donationTypes[post.donation_type]}
+            <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
+              {post.author?.avatar_signed_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={post.author.avatar_signed_url}
+                  alt={post.author.full_name}
+                  className="h-5 w-5 rounded-full object-cover"
+                />
+              ) : (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-800">
+                  {(post.author?.full_name || "U").charAt(0).toUpperCase()}
+                </span>
+              )}
+              <span className="truncate max-w-[120px]">{post.author?.full_name || "Community Member"}</span>
             </span>
             <span className="inline-flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {new Date(post.created_at).toLocaleDateString()}
             </span>
+          </div>
+
+          <div className="text-[11px] font-medium text-emerald-700">
+            {post.donation_type === "money" && post.amount
+              ? `${post.amount.toLocaleString()} ${post.currency}`
+              : post.quantity
+                ? `${post.quantity} ${post.unit || ""}`
+                : t.donationTypes[post.donation_type]}
           </div>
         </CardContent>
       </Card>

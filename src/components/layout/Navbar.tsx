@@ -115,6 +115,25 @@ export function Navbar() {
                   </Button>
                 </Link>
               )}
+              <Link
+                href="/profile"
+                title={user.full_name}
+                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-2.5 text-xs font-medium text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50/60"
+              >
+                {user.avatar_signed_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.avatar_signed_url}
+                    alt={user.full_name}
+                    className="h-6 w-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-[11px] font-bold text-emerald-800">
+                    {user.full_name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span className="max-w-[90px] truncate">{user.full_name.split(" ")[0]}</span>
+              </Link>
               <Button variant="ghost" size="icon" onClick={() => void logout()} aria-label={t.nav.logout}>
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -174,6 +193,17 @@ export function Navbar() {
                 </Link>
                 <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
                   {t.nav.dashboard}
+                </Link>
+                <Link href="/profile" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
+                  {user.avatar_signed_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.avatar_signed_url} alt={user.full_name} className="h-5 w-5 rounded-full object-cover" />
+                  ) : (
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-800">
+                      {user.full_name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span>{lang === "bn" ? "আমার প্রোফাইল" : "My Profile"}</span>
                 </Link>
                 <Link href="/messages" onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">
                   {t.nav.messages}

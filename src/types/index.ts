@@ -69,6 +69,7 @@ export interface Post {
     id: string;
     full_name: string;
     avatar_url?: string | null;
+    avatar_signed_url?: string | null;
     bio?: string | null;
     location_city?: string | null;
     location_area?: string | null;
